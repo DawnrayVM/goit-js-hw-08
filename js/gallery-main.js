@@ -79,8 +79,7 @@ V 6. Очистка значения атрибута src элемента img.l
 
 V Закрытие модального окна по клику на div.lightbox__overlay.
 V Закрытие модального окна по нажатию клавиши ESC.
-Пролистывание изображений галереи в открытом модальном окне клавишами "влево" и "вправо".
-
+V Пролистывание изображений галереи в открытом модальном окне клавишами "влево" и "вправо".
 
 <li class="gallery__item">
   <a
@@ -99,20 +98,37 @@ V Закрытие модального окна по нажатию клави�
 
 const refGallery = document.querySelector("ul.js-gallery");
 const refModal = document.querySelector(".js-lightbox");
+let imageIndex;
 
 refGallery.addEventListener("click", onGalleryClick);
 
-let imageIndex;
-
+function renderGallery() {
+  galleryImgs.map((item, index) => {
+    const galleryItem = document.createElement("li");
+    const linkItem = document.createElement("a");
+    const imgItem = document.createElement("img");
+    galleryItem.classList.add("gallery__item");
+    linkItem.classList.add("gallery__link");
+    imgItem.classList.add("gallery__image");
+    refGallery.appendChild(galleryItem);
+    galleryItem.appendChild(linkItem);
+    linkItem.appendChild(imgItem);
+    linkItem.setAttribute("href", item.original);
+    imgItem.setAttribute("src", item.preview);
+    imgItem.setAttribute("alt", item.description);
+    imgItem.setAttribute("data-source", item.original);
+    imgItem.setAttribute("data-index", index);
+  });
+}
 function onGalleryClick(event) {
   event.preventDefault();
 
-  if (event.target.nodeName === "UL") {
+  if (event.target.nodeName !== "IMG") {
     return;
   }
   openModal();
-  refModal.addEventListener("click", closeModal);
-  window.addEventListener("keydown", closeModal);
+  refModal.addEventListener("click", onModal);
+  window.addEventListener("keydown", onModal);
 }
 
 function openModal() {
@@ -120,37 +136,46 @@ function openModal() {
   refModal
     .querySelector("img")
     .setAttribute("src", event.target.dataset.source);
-  console.log(Number(event.target.dataset.index));
+  // console.log(Number(event.target.dataset.index));
   imageIndex = Number(event.target.dataset.index);
   // console.log(imageIndex);
 }
 
-function slideImages() {
+function onModal() {
+  slideImages();
+  closeModal();
+}
+
+function setImageIndex() {
   if (imageIndex > galleryImgs.length || imageIndex < 0) {
     return;
   }
   refModal
     .querySelector("img")
     .setAttribute("src", galleryImgs[imageIndex].original);
-  console.log(galleryImgs[imageIndex].original);
+  // console.log(galleryImgs[imageIndex].original);
 }
 
-function closeModal() {
+function slideImages() {
   if (event.code === "ArrowRight") {
     if (imageIndex < galleryImgs.length - 1) {
       imageIndex += 1;
     }
-    console.log("clickR", imageIndex);
-    slideImages();
+    // console.log("clickR", imageIndex);
+    setImageIndex();
     return;
   } else if (event.code === "ArrowLeft") {
     if (imageIndex > 0) {
       imageIndex -= 1;
     }
-    console.log("clickL", imageIndex);
-    slideImages();
+    // console.log("clickL", imageIndex);
+    setImageIndex();
     return;
-  } else if (
+  }
+}
+
+function closeModal() {
+  if (
     event.target.dataset.action !== "close-lightbox" &&
     !event.target.classList.contains("lightbox__overlay") &&
     event.code !== "Escape"
@@ -159,28 +184,9 @@ function closeModal() {
   }
 
   refModal.classList.remove("is-open");
-  refModal.removeEventListener("click", closeModal);
-  window.removeEventListener("keydown", closeModal);
+  refModal.removeEventListener("click", onModal);
+  window.removeEventListener("keydown", onModal);
   refModal.querySelector("img").removeAttribute("src");
-  // imageIndex = 0;
-  //   console.log("click");
 }
 
-galleryImgs.map((item, index) => {
-  const galleryItem = document.createElement("li");
-  const linkItem = document.createElement("a");
-  const imgItem = document.createElement("img");
-  galleryItem.classList.add("gallery__item");
-  linkItem.classList.add("gallery__link");
-  imgItem.classList.add("gallery__image");
-  refGallery.appendChild(galleryItem);
-  galleryItem.appendChild(linkItem);
-  linkItem.appendChild(imgItem);
-  linkItem.setAttribute("href", item.original);
-  imgItem.setAttribute("src", item.preview);
-  imgItem.setAttribute("alt", item.description);
-  imgItem.setAttribute("data-source", item.original);
-  imgItem.setAttribute("data-index", index);
-});
-
-// console.log(refGallery.querySelector("img").dataset.index);
+renderGallery();
