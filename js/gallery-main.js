@@ -102,6 +102,8 @@ const refModal = document.querySelector(".js-lightbox");
 
 refGallery.addEventListener("click", onGalleryClick);
 
+let imageIndex;
+
 function onGalleryClick(event) {
   event.preventDefault();
 
@@ -118,16 +120,37 @@ function openModal() {
   refModal
     .querySelector("img")
     .setAttribute("src", event.target.dataset.source);
+  console.log(Number(event.target.dataset.index));
+  imageIndex = Number(event.target.dataset.index);
+  // console.log(imageIndex);
 }
 
-// function nextImg() {
-//     const imgIndex = refGallery.querySelector("img").dataset.index;
-// refGallery.
-
-// }
+function slideImages() {
+  if (imageIndex > galleryImgs.length || imageIndex < 0) {
+    return;
+  }
+  refModal
+    .querySelector("img")
+    .setAttribute("src", galleryImgs[imageIndex].original);
+  console.log(galleryImgs[imageIndex].original);
+}
 
 function closeModal() {
-  if (
+  if (event.code === "ArrowRight") {
+    if (imageIndex < galleryImgs.length - 1) {
+      imageIndex += 1;
+    }
+    console.log("clickR", imageIndex);
+    slideImages();
+    return;
+  } else if (event.code === "ArrowLeft") {
+    if (imageIndex > 0) {
+      imageIndex -= 1;
+    }
+    console.log("clickL", imageIndex);
+    slideImages();
+    return;
+  } else if (
     event.target.dataset.action !== "close-lightbox" &&
     !event.target.classList.contains("lightbox__overlay") &&
     event.code !== "Escape"
@@ -135,14 +158,11 @@ function closeModal() {
     return;
   }
 
-  //   if (event.code === "ArrowRight") {
-  //     nextImg();
-  //   }
   refModal.classList.remove("is-open");
-  window.scroll.preventDefault();
   refModal.removeEventListener("click", closeModal);
-  window.removeEventListener("keypress", closeModal);
+  window.removeEventListener("keydown", closeModal);
   refModal.querySelector("img").removeAttribute("src");
+  // imageIndex = 0;
   //   console.log("click");
 }
 
